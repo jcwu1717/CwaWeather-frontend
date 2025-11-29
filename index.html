@@ -7,258 +7,278 @@
     <title>水墨天氣 | 台灣天氣查詢平台</title>
     <link rel="icon" type="image/png" href="./icon_weather.png">
 
-    <!DOCTYPE html>
-    <html lang="zh-TW">
+    <!-- 字體：Noto Serif TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700;900&display=swap"
+        rel="stylesheet">
 
-    <head>
+    <style>
+        /* ====== 水墨風色票 ====== */
+        :root {
+            --ink-black: #1a1a1a;
+            --ink-dark: #2c2c2c;
+            --ink-gray: rgba(255, 255, 255, 0.8);
+            --ink-light: rgba(255, 255, 255, 0.6);
+            --ink-border: rgba(0, 0, 0, 0.35);
+            --ink-blur: rgba(255, 255, 255, 0.25);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Serif TC", serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        <!-- 字體：Noto Serif TC -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700;900&display=swap"
-            rel="stylesheet">
+        body {
+            color: var(--ink-black);
+            min-height: 100vh;
+            /* 防止 iOS 左右滑動 */
+            overflow-x: hidden;
+            padding-bottom: 20px;
 
-        <style>
-            /* ====== 水墨風色票 ====== */
-            :root {
-                --ink-black: #1a1a1a;
-                --ink-dark: #2c2c2c;
-                --ink-gray: rgba(255, 255, 255, 0.8);
-                --ink-light: rgba(255, 255, 255, 0.6);
-                --ink-border: rgba(0, 0, 0, 0.35);
-                --ink-blur: rgba(255, 255, 255, 0.25);
-            }
-
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                font-family: "Noto Serif TC", serif;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            body {
-                color: var(--ink-black);
-                min-height: 100vh;
-                /* 防止 iOS 左右滑動 */
-                overflow-x: hidden;
-                padding-bottom: 20px;
-
-                /* 背景圖：水墨山景 */
-                background-image: url('https://images.unsplash.com/photo-1577083639236-0f560d3d771c?q=80&w=1967&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by-wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-                background-size: cover;
-                background-position: center;
-                background-attachment: fixed;
+            /* 背景圖：水墨山景 */
+            background-image: url('https://images.unsplash.com/photo-1577083639236-0f560d3d771c?q=80&w=1967&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by-wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
 
 
-            }
+        }
 
-            /* ====== 頂部狀態列（墨色透明） ====== */
-            .status-bar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px 20px;
-                position: sticky;
-                top: 0;
-                z-index: 100;
-                background: rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(8px);
-                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            }
+        /* ====== 頂部狀態列（墨色透明） ====== */
+        .status-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
 
-            /* 地點膠囊：淡墨框線 */
-            .location-select {
-                padding: 4px 10px;
-                border-radius: 20px;
-                font-weight: 700;
-                font-size: 1.05rem;
-                background: var(--ink-light);
-                border: 1px solid var(--ink-border);
-                color: var(--ink-black);
-                outline: none;
-                cursor: pointer;
-                appearance: none;
-                /* Remove default arrow */
-                -webkit-appearance: none;
-                text-align: center;
-                /* Add a custom arrow if desired, or keep it simple */
-                background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-                background-repeat: no-repeat;
-                background-position: right 10px top 50%;
-                background-size: 0.65rem auto;
-                padding-right: 30px;
-                /* Space for arrow */
-            }
+        /* 地點膠囊：淡墨框線 */
+        .location-select {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            background: var(--ink-light);
+            border: 1px solid var(--ink-border);
+            color: var(--ink-black);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            /* Remove default arrow */
+            -webkit-appearance: none;
+            text-align: center;
+            /* Add a custom arrow if desired, or keep it simple */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 0.65rem auto;
+            padding-right: 30px;
+            /* Space for arrow */
+        }
 
-            .update-pill {
-                font-size: 0.8rem;
-                color: var(--ink-black);
-                padding: 4px 10px;
-                border-radius: 12px;
-                background: rgba(255, 255, 255, 0.3);
-                border: 1px solid rgba(0, 0, 0, 0.25);
-            }
+        .update-pill {
+            font-size: 0.8rem;
+            color: var(--ink-black);
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.25);
+        }
 
-            /* ====== 主容器 ====== */
-            .container {
-                padding: 20px;
-                max-width: 650px;
-                margin: 0 auto;
-            }
+        /* ====== 主容器 ====== */
+        .container {
+            padding: 20px;
+            max-width: 650px;
+            margin: 0 auto;
+        }
 
-            /* ====== 今日天氣主卡（宣紙質感） ====== */
-            .hero-card {
-                background: rgba(255, 255, 255, 0.65);
-                border-radius: 20px;
-                padding: 30px 25px;
-                text-align: center;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                border: 1.5px solid var(--ink-border);
-                backdrop-filter: blur(4px);
-                margin-bottom: 25px;
-                position: relative;
-            }
+        /* ====== 今日天氣主卡（宣紙質感） ====== */
+        .hero-card {
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1.5px solid var(--ink-border);
+            backdrop-filter: blur(4px);
+            margin-bottom: 25px;
+            position: relative;
+        }
 
-            .hero-period {
-                position: absolute;
-                top: -15px;
-                left: 50%;
-                transform: translateX(-50%);
-                padding: 4px 20px;
-                border-radius: 20px;
-                font-weight: 600;
-                background: white;
-                border: 1px solid var(--ink-border);
-            }
+        .hero-period {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            background: white;
+            border: 1px solid var(--ink-border);
+        }
 
-            .hero-temp-container {
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                margin: 15px 0;
-            }
+        .hero-temp-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
 
-            /* Emoji 加強水墨風：降低飽和度 */
-            .hero-icon {
-                font-size: 5rem;
-                filter: grayscale(50%) contrast(120%);
-            }
+        /* Emoji 加強水墨風：降低飽和度 */
+        .hero-icon {
+            font-size: 5rem;
+            filter: grayscale(50%) contrast(120%);
+        }
 
-            .hero-temp {
-                font-size: 4.5rem;
-                font-weight: 900;
-                color: var(--ink-black);
-            }
+        .hero-temp {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: var(--ink-black);
+        }
 
-            .hero-desc {
-                font-size: 1.4rem;
-                margin-bottom: 20px;
-                font-weight: 700;
-                color: var(--ink-dark);
-            }
+        .hero-desc {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: var(--ink-dark);
+        }
 
-            /* ====== 建議區：小墨塊 ====== */
-            .advice-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 15px;
-                padding-top: 20px;
-                border-top: 1px solid rgba(0, 0, 0, 0.25);
-            }
+        /* ====== 建議區：小墨塊 ====== */
+        .advice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.25);
+        }
 
-            .advice-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 12px;
-                background: rgba(255, 255, 255, 0.55);
-                border: 1px solid rgba(0, 0, 0, 0.25);
-                border-radius: 15px;
-                backdrop-filter: blur(3px);
-            }
+        .advice-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 15px;
+            backdrop-filter: blur(3px);
+        }
 
-            .advice-icon {
-                font-size: 2rem;
-                filter: grayscale(50%);
-            }
+        .advice-icon {
+            font-size: 2rem;
+            filter: grayscale(50%);
+        }
 
-            .advice-text {
-                font-weight: 700;
-                margin-top: 5px;
-            }
+        .advice-text {
+            font-weight: 700;
+            margin-top: 5px;
+        }
 
-            /* ====== 稍後預報 ====== */
-            .section-title {
-                margin-bottom: 10px;
-                margin-left: 5px;
-                font-weight: 700;
-                color: black;
-                text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-            }
+        /* ====== 稍後預報 ====== */
+        .section-title {
+            margin-bottom: 10px;
+            margin-left: 5px;
+            font-weight: 700;
+            color: black;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
 
-            .scroll-container {
-                display: flex;
-                gap: 15px;
-                overflow-x: auto;
-                padding-bottom: 10px;
-                scrollbar-width: none;
-            }
+        .scroll-container {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+        }
 
-            .scroll-container::-webkit-scrollbar {
-                display: none;
-            }
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
 
-            .mini-card {
-                min-width: 130px;
-                background: rgba(255, 255, 255, 0.6);
-                border: 1px solid rgba(0, 0, 0, 0.25);
-                border-radius: 20px;
-                padding: 18px 12px;
-                text-align: center;
-                backdrop-filter: blur(3px);
-            }
+        .mini-card {
+            min-width: 130px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            padding: 18px 12px;
+            text-align: center;
+            backdrop-filter: blur(3px);
+        }
 
-            .mini-time {
-                font-size: 0.85rem;
-                padding: 3px 10px;
-                display: inline-block;
-                margin-bottom: 10px;
-                border: 1px solid rgba(0, 0, 0, 0.25);
-                border-radius: 12px;
-                background: white;
-            }
+        .mini-time {
+            font-size: 0.85rem;
+            padding: 3px 10px;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            background: white;
+        }
 
-            .mini-icon {
-                font-size: 2.3rem;
-                margin: 5px 0;
-                filter: grayscale(50%);
-            }
+        .mini-icon {
+            font-size: 2.3rem;
+            margin: 5px 0;
+            filter: grayscale(50%);
+        }
 
-            .mini-temp {
-                font-size: 1.1rem;
-                font-weight: 700;
-            }
+        .mini-temp {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
 
-            /* ====== Loading 畫面：水墨雲 ====== */
-            .loading-screen {
-                position: fixed;
-                inset: 0;
-                background: rgba(255, 255, 255, 0.6);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                z-index: 999;
-                backdrop-filter: blur(4px);
-            }
+        /* ====== Loading 畫面：水墨雲 ====== */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
 
-            .loading-screen div {
-                filter: grayscale(50%);
-            }
-        </style>
-    </head>
+        .loading-screen div {
+            filter: grayscale(50%);
+        }
+
+        /* ====== 地震報告卡片 ====== */
+        .earthquake-card {
+            min-width: 300px;
+            /* 比一般卡片寬 */
+            max-width: 100%;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .earthquake-content {
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.5;
+            color: var(--ink-dark);
+        }
+
+        .earthquake-img {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            filter: sepia(20%) contrast(110%);
+            /* 微調圖片風格以配合水墨主題 */
+        }
+    </style>
+</head>
 
 <body>
     <div id="loading" class="loading-screen">
@@ -299,10 +319,15 @@
 
         <h3 class="section-title">稍後預報</h3>
         <div id="futureForecasts" class="scroll-container"></div>
+
+        <h3 class="section-title" style="margin-top: 25px;">最近的顯著有感地震報告</h3>
+        <div id="earthquakeContainer" class="scroll-container">
+            <!-- 地震報告將渲染於此 -->
+        </div>
     </div>
 
     <script>
-        const API_URL_BASE = "https://weather-taiwan.zeabur.app/api/weather?locationName=";
+        const API_URL_BASE = "https://weather-taiwan.zeabur.app/";
 
         function getWeatherIcon(weather) {
             if (!weather) return "🌤️";
@@ -405,9 +430,31 @@
                 `${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         }
 
+        async function fetchEarthquake() {
+            const apiUrl = API_URL_BASE + "api/earthquake";
+            try {
+                const response = await fetch(apiUrl);
+                const json = await response.json();
+
+                if (json.success && json.data && json.data.length > 0) {
+                    const report = json.data[0];
+                    const container = document.getElementById("earthquakeContainer");
+
+                    container.innerHTML = `
+                        <div class="mini-card earthquake-card">
+                            <div class="earthquake-content">${report.ReportContent}</div>
+                            <img src="${report.ReportImageURI}" class="earthquake-img" alt="地震報告圖片">
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error("地震資料取得失敗", e);
+            }
+        }
+
         async function fetchWeather() {
             const location = document.getElementById("locationSelect").value;
-            const apiUrl = API_URL_BASE + encodeURIComponent(location);
+            const apiUrl = API_URL_BASE + "api/weather?locationName=" + encodeURIComponent(location);
 
             // Show loading
             document.getElementById("loading").style.display = "flex";
@@ -416,6 +463,8 @@
             try {
                 const delay = new Promise(r => setTimeout(r, 800)); // Reduced delay slightly for better UX
                 const fetchData = fetch(apiUrl).then(r => r.json());
+                const fetchEq = fetchEarthquake();
+
                 const [_, json] = await Promise.all([delay, fetchData]);
 
                 if (json.success) {
